@@ -49,3 +49,16 @@ export type CityWeather = {
   name: string;
   cod: number;
 };
+
+type ErrorResponse = {
+  success: false;
+  error: string;
+};
+
+type SuccessResponse = {
+  success: true;
+  data?: any;
+  message?: string;
+};
+
+export type ServiceResponse = ErrorResponse | SuccessResponse;

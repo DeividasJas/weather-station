@@ -14,12 +14,16 @@ export default function SearchBar() {
 
   const handleCityClick = async (city: CityObject) => {
     try {
-      setSearchResults([]);
       setLoadingCityWeather(true);
-      const cityWeatherData = await getCityWeather(city);
-      setCityWeather(cityWeatherData);
+      const results = await getCityWeather(city);
+
+      if (results.success) {
+        setCityWeather(results.data);
+        setSearchResults([]);
+      } else {
+        toast.error(results.error);
+      }
     } catch (error: any) {
-      toast.error(error.message);
       console.error(error);
     } finally {
       setLoadingCityWeather(false);
@@ -30,21 +34,26 @@ export default function SearchBar() {
   ) => {
     const value = event.target.value;
     try {
-      if (value.trim()) {
-        setIsLoading(true);
-        const results = await searchCity(value);
-        setSearchResults(results);
+      if (!value.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      setIsLoading(true);
 
-        if (results.length <= 0 && value.trim().length > 0) {
-          toast.error("No cities found");
-        }
+      const results = await searchCity(value);
+      if (results.success) {
+        setSearchResults(results.data);
+        // if (results.data.length === 0) {
+        //   toast.error("No cities found");
+        // }
       } else {
         setSearchResults([]);
+        throw new Error(results.error);
       }
     } catch (error: any) {
       console.error(error);
       setSearchResults([]);
-      toast.error("An error occurred while searching for cities");
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }

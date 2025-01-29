@@ -1,12 +1,21 @@
 "use server";
 import { prisma } from "@/utils/prismaClient";
-import { CityObject } from "@/types/projectTypes";
+import { CityObject, ServiceResponse } from "@/types/projectTypes";
 import { addNewCity } from "./citiesActions";
 
-export const incrementStatistics = async (city: CityObject) => {
+export const incrementStatistics = async (
+  city: CityObject,
+): Promise<ServiceResponse> => {
   try {
-    await addNewCity(city);
-    await prisma.city.update({
+    const addCityResults = await addNewCity(city);
+
+    if (!addCityResults.success) {
+      console.log("add city result from increment", addCityResults);
+
+      return addCityResults;
+    }
+
+    const updatedStatistics = await prisma.city.update({
       where: {
         name: city.name,
       },
@@ -16,12 +25,16 @@ export const incrementStatistics = async (city: CityObject) => {
         },
       },
     });
+    console.log(updatedStatistics);
+
+    return { success: true, message: "Statistics updated" };
   } catch (error) {
     console.error(error);
+    return { success: false, error: "Error while incrementing statistics" };
   }
 };
 
-export const getStatistics = async () => {
+export const getStatistics = async (): Promise<ServiceResponse> => {
   try {
     const mostSearchedCities = await prisma.city.findMany({
       orderBy: {
@@ -29,8 +42,13 @@ export const getStatistics = async () => {
       },
       take: 20,
     });
-    return mostSearchedCities;
+    return {
+      success: true,
+      data: mostSearchedCities,
+      message: "Successfully fetched most searched cities",
+    };
   } catch (error) {
     console.error(error);
+    return { success: false, error: "Error while fetching statistics" };
   }
 };

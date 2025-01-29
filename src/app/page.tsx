@@ -1,5 +1,5 @@
 import SearchBar from "../components/SearchBar";
-import CityCurrentWeather from "@/components/CityCurrentWeather";
+import CityCurrentWeather from "@/components/CurrentCityWeather";
 
 export default function Home() {
   return (
